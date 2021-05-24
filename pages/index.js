@@ -1,21 +1,65 @@
-import Head from 'next/head'
-import CritterList from '../components/CritterList/CritterList'
-import axios from "axios"
+// import Head from 'next/head'
+// import CritterList from '../components/CritterList/CritterList'
+// import axios from "axios"
 
-export const getStaticProps = async () => {
-    const {data: fishArr} = await axios.get("https://acnhapi.com/v1/fish")
+// export const getStaticProps = async () => {
+//     const {data: fishArr} = await axios.get("https://acnhapi.com/v1/fish")
 
-    return {
-        props: { fishArr }
-    }
-} 
+//     return {
+//         props: { fishArr }
+//     }
+// } 
 
-const Home = ({fishArr}) => {
-    return (
-        <div>
-            <CritterList fishArr={fishArr} />
-        </div>
-    )
+// const Home = ({fishArr}) => {
+//     return (
+//         <div>
+//             <CritterList fishArr={fishArr} />
+//         </div>
+//     )
+// }
+
+// export default Home
+
+import {
+  useAuthUser,
+  withAuthUser,
+  withAuthUserTokenSSR,
+} from 'next-firebase-auth'
+import Header from '../components/Header'
+import DemoPageLinks from '../components/DemoPageLinks'
+
+const styles = {
+  content: {
+    padding: 32,
+  },
+  infoTextContainer: {
+    marginBottom: 32,
+  },
 }
 
-export default Home
+const Demo = () => {
+  const AuthUser = useAuthUser()
+  return (
+    <div>
+      <Header email={AuthUser.email} signOut={AuthUser.signOut} />
+      <div style={styles.content}>
+        <div style={styles.infoTextContainer}>
+          <h3>Home</h3>
+          <p>
+            This page does not require authentication, so it won't redirect to
+            the login page if you are not signed in.
+          </p>
+          <p>
+            If you remove `getServerSideProps` from this page, it will be static
+            and load the authed user only on the client side.
+          </p>
+        </div>
+        <DemoPageLinks />
+      </div>
+    </div>
+  )
+}
+
+export const getServerSideProps = withAuthUserTokenSSR()()
+
+export default withAuthUser()(Demo)
